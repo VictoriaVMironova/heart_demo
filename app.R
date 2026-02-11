@@ -46,8 +46,24 @@ ui <- page_sidebar(
 )
 
 server <- function(input, output, session) {
+  filtered_data <- reactive({
+    d <- heart
+    if (input$outcome != "All") {
+      d <- d[d$DIED == input$outcome, ]
+    }
+    if (input$diagnosis != "All") {
+      d <- d[as.character(d$DIAGNOSIS) == input$diagnosis, ]
+    }
+    if (input$drg != "All") {
+      d <- d[as.character(d$DRG) == input$drg, ]
+    }
+    d <- d[d$AGE >= input$age_range[1] & d$AGE <= input$age_range[2], ]
+    d
+  })
+  
+  
   output$data_table <- DT::renderDataTable({
-    heart
+    filtered_data()
   })
   
 }
