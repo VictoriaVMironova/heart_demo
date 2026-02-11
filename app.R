@@ -11,7 +11,30 @@ ui <- page_sidebar(
   ),
   theme = bs_theme(bootswatch = "pulse"),
   sidebar = sidebar(
-    "Filters coming soon..."
+    selectInput(
+      inputId = "outcome",
+      label = "Outcome:",
+      choices = c("All", "Survived", "Died")
+    ),
+    selectInput(
+      inputId = "diagnosis",
+      label = "Diagnosis:",
+      choices = c("All", sort(unique(as.character(heart$DIAGNOSIS)))),
+      selected = "All"
+    ),
+    selectInput(
+      inputId = "drg",
+      label = "DRG:",
+      choices = c("All", sort(unique(as.character(heart$DRG)))),
+      selected = "All"
+    ),
+    sliderInput(
+      inputId = "age_range",
+      label = "Age Range:",
+      min = min(heart$AGE),
+      max = max(heart$AGE),
+      value = c(min(heart$AGE), max(heart$AGE))
+    )
   ),
   navset_tab(
     nav_panel("Overview", "Overview content coming soon..."),
