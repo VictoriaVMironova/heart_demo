@@ -1,5 +1,6 @@
 library(shiny)
 library(bslib)
+library(DT)
 
 heart <- readRDS("data/heart.rds")
 
@@ -15,11 +16,16 @@ ui <- page_sidebar(
   navset_tab(
     nav_panel("Overview", "Overview content coming soon..."),
     nav_panel("Explore", "Explore content coming soon..."),
-    nav_panel("Data", "Data content coming soon...")
-  )
+    nav_panel(
+      "Data", 
+      DT::dataTableOutput("data_table"))
+    )
 )
 
 server <- function(input, output, session) {
+  output$data_table <- DT::renderDataTable({
+    heart
+  })
   
 }
 
