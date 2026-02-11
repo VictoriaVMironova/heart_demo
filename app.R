@@ -4,6 +4,7 @@ library(DT)
 library(tidyverse)
 library(plotly)
 source("R/helpers.R")
+source("R/mod_download_plot.R")
 
 heart <- readRDS("data/heart.rds")
 
@@ -66,7 +67,8 @@ ui <- page_sidebar(
       ),
       card(
         card_header("Age Distribution"),
-        plotOutput("age_hist")
+        plotOutput("age_hist"),
+        mod_download_plot_ui("dl_age", label = "Download")
       )
       
       ),
