@@ -78,6 +78,17 @@ server <- function(input, output, session) {
     d
   })
   
+  # Female stats
+  output$f_mortality <- renderText({
+    d <- filtered_data()[filtered_data()$SEX == "Female", ]
+    paste0(round(100 * sum(d$DIED == "Died") / nrow(d), 1), "%")
+  })
+  
+  # Male stats
+  output$m_mortality <- renderText({
+    d <- filtered_data()[filtered_data()$SEX == "Male", ]
+    paste0(round(100 * sum(d$DIED == "Died") / nrow(d), 1), "%")
+  })
   
   output$data_table <- DT::renderDataTable({
     filtered_data()
