@@ -20,3 +20,4 @@ colnames(heart)[colnames(heart) == "Patient"] <- "ID"
 str(heart)
 summary(heart)
 saveRDS(heart, "data/heart.rds")
+
