@@ -37,7 +37,24 @@ ui <- page_sidebar(
     )
   ),
   navset_tab(
-    nav_panel("Overview", "Overview content coming soon..."),
+    nav_panel(
+      "Overview",
+      layout_column_wrap(
+        width = 1/2,
+        value_box(
+          title = "Female Mortality",
+          value = textOutput("f_mortality"),
+          theme = "danger",
+          showcase = bsicons::bs_icon("gender-female")
+        ),
+        value_box(
+          title = "Male Mortality",
+          value = textOutput("m_mortality"),
+          theme = "primary",
+          showcase = bsicons::bs_icon("gender-male")
+        )
+      )
+      ),
     nav_panel("Explore", "Explore content coming soon..."),
     nav_panel(
       "Data", 
