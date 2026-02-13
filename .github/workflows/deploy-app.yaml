@@ -7,14 +7,15 @@ on:
   workflow_dispatch:
   # Trigger on push to `main` branch
   push:
-  branches: ["main"]
-# Trigger on pull request to all branches
-pull_request:
-  
-  jobs:
+    branches: ["main"]
+  # Trigger on pull request to all branches
+  pull_request:
+
+jobs:
   shinylive:
-  uses: posit-dev/r-shinylive/.github/workflows/deploy-app.yaml@actions-v1
+    uses: posit-dev/r-shinylive/.github/workflows/deploy-app.yaml@actions-v1
+
 # Permissions required to make a Pages deployment
 permissions:
-  pages: write # to deploy to Pages
-id-token: write # to verify the deployment 
+  pages: write   # to deploy to Pages
+  id-token: write # to verify the deployment
