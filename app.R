@@ -126,6 +126,40 @@ server <- function(input, output, session) {
     d
   })
   
+  fmt_num <- function(x, digits = 1) {
+    if (is.na(x) || length(x) == 0) return("NA")
+    formatC(x, format = "f", digits = digits, big.mark = ",")
+  }
+  
+  charges_metrics <- reactive({
+    df <- filtered_data()
+    req(nrow(df) >= 1)
+    
+    # Ensure numeric (defensive; harmless if already numeric)
+    chg <- suppressWarnings(as.numeric(df$CHARGES))
+    los <- suppressWarnings(as.numeric(df$LOS))
+    
+    # Avg bill: exclude missing CHARGES
+    n_bill <- sum(!is.na(chg))
+    avg_bill <- if (n_bill > 0) mean(chg, na.rm = TRUE) else NA_real_
+    
+    # Avg LOS: include LOS=0 (still valid), exclude NA if any
+    n_los <- sum(!is.na(los))
+    avg_los <- if (n_los > 0) mean(los, na.rm = TRUE) else NA_real_
+    
+    # Cost per day: exclude CHARGES NA and LOS <= 0 (avoid divide-by-zero)
+    ok <- !is.na(chg) & !is.na(los) & los > 0
+    n_cpd <- sum(ok)
+    cost_per_day <- if (n_cpd > 0) mean(chg[ok] / los[ok]) else NA_real_
+    
+    list(
+      avg_bill_text = paste0(fmt_num(avg_bill, 0), " (n=", n_bill, ")"),
+      avg_los_text = paste0(fmt_num(avg_los, 1), " (n=", n_los, ")"),
+      cost_per_day_text = paste0(fmt_num(cost_per_day, 0), " (n=", n_cpd, ")")
+    )
+  })
+  
+  
   # Female stats
   output$f_mortality <- renderText({
     compute_mortality(filtered_data()[filtered_data()$SEX == "Female", ])
@@ -200,6 +234,19 @@ server <- function(input, output, session) {
     updateSliderInput(session, "age_range",
                       value = c(min(heart$AGE), max(heart$AGE)))
   })
+  
+  output$avg_bill <- renderText({
+    charges_metrics()$avg_bill_text
+  })
+  
+  output$avg_los <- renderText({
+    charges_metrics()$avg_los_text
+  })
+  
+  output$cost_per_day <- renderText({
+    charges_metrics()$cost_per_day_text
+  })
+  
   
   
   output$data_table <- DT::renderDataTable({
