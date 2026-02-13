@@ -110,8 +110,12 @@ ui <- page_sidebar(
       )
     ),
     nav_panel(
-      "Data", 
-      DT::dataTableOutput("data_table"))
+      "Data",
+      downloadButton("dl_filtered_csv", "Download filtered data (CSV)"),
+      tags$br(),
+      DT::dataTableOutput("data_table")
+    )
+    
     )
 )
 
@@ -315,6 +319,16 @@ server <- function(input, output, session) {
   output$data_table <- DT::renderDataTable({
     filtered_data()
   })
+  output$dl_filtered_csv <- downloadHandler(
+    filename = function() {
+      paste0("heart_filtered_", format(Sys.Date(), "%Y-%m-%d"), ".csv")
+    },
+    content = function(file) {
+      df <- filtered_data()
+      # Write as CSV
+      write.csv(df, file, row.names = FALSE, na = "")
+    }
+  )
   
 }
 
