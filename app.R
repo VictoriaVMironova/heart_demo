@@ -252,7 +252,64 @@ server <- function(input, output, session) {
     charges_metrics()$cost_per_day_text
   })
   
+  charges_boxplot_obj <- reactive({
+    df <- filtered_data()
+    req(nrow(df) >= 1)
+    
+    # Defensive numeric conversion
+    chg <- suppressWarnings(as.numeric(df$CHARGES))
+    los <- suppressWarnings(as.numeric(df$LOS))
+    
+    # Row-level cost/day (exclude bad rows)
+    ok <- !is.na(chg) & !is.na(los) & los > 0
+    df2 <- df[ok, , drop = FALSE]
+    req(nrow(df2) >= 1)
+    
+    df2$cost_per_day <- chg[ok] / los[ok]
+    
+    # Optional scalability: if DRG == "All", facet only top N DRGs by count
+    if (isTruthy(input$drg) && input$drg == "All") {
+      top_n <- 12
+      top_drg <- df2 %>%
+        count(DRG, sort = TRUE) %>%
+        slice_head(n = top_n) %>%
+        pull(DRG)
+      df2 <- df2 %>% filter(DRG %in% top_drg)
+    }
+    
+    # Ensure clean facet labels & consistent ordering
+    df2 <- df2 %>%
+      mutate(
+        SEX = factor(SEX),
+        DRG = factor(DRG)
+      )
+    
+    ggplot(df2, aes(x = SEX, y = cost_per_day)) +
+      geom_boxplot(outlier.alpha = 0.25, na.rm = TRUE) +
+      labs(
+        x = "Sex",
+        y = "Charges per day",
+        caption = "Cost per day = CHARGES / LOS (excluding LOS ≤ 0 and missing values)"
+      ) +
+      facet_wrap(~ DRG, scales = "free_y") +
+      scale_y_continuous(labels = scales::label_number(big.mark = ",")) +
+      theme_minimal() +
+      theme(
+        axis.title = element_text(size = 14),
+        axis.text = element_text(size = 12),
+        strip.text = element_text(size = 11)
+      )
+  })
   
+  output$charges_boxplot <- renderPlot({
+    charges_boxplot_obj()
+  })
+  
+  mod_download_plot_server(
+    "dl_charges_boxplot",
+    filename = "daily_charges_boxplot",
+    figure = charges_boxplot_obj
+  )
   
   output$data_table <- DT::renderDataTable({
     filtered_data()
