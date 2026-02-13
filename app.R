@@ -105,7 +105,7 @@ ui <- page_sidebar(
       ),
       card(
         card_header("Daily Charges (Cost per Day)"),
-        plotOutput("charges_boxplot", height = "450px"),
+        plotlyOutput("charges_boxplot", height = "450px"),
         mod_download_plot_ui("dl_charges_boxplot", label = "Download")
       )
     ),
@@ -301,8 +301,9 @@ server <- function(input, output, session) {
       )
   })
   
-  output$charges_boxplot <- renderPlot({
-    charges_boxplot_obj()
+  output$charges_boxplot <- renderPlotly({
+    ggplotly(charges_boxplot_obj(), tooltip = "text") %>%
+      layout(boxmode = "group")
   })
   
   mod_download_plot_server(
