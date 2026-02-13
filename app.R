@@ -136,6 +136,23 @@ ui <- page_sidebar(
       downloadButton("dl_filtered_csv", "Download filtered data (CSV)"),
       tags$br(),
       DT::dataTableOutput("data_table")
+    ),
+    nav_panel(
+      "About",
+      card(
+        card_header("About This Dashboard"),
+        tags$p("This dashboard explores heart attack outcomes and hospital utilization patterns."),
+        tags$p("The data source is a historical cohort of 12,844 heart attack patients from New York State in 1993."),
+        tags$h5("Why women can have higher heart attack mortality"),
+        tags$ul(
+          tags$li("Women are often older at presentation and have more comorbidities, which increases baseline risk."),
+          tags$li("Women more often present without classic chest pain, which can delay diagnosis and treatment."),
+          tags$li("Women with STEMI can experience longer delays to reperfusion and longer ischemic time."),
+          tags$li("In routine care, women may receive less guideline-directed therapy in some settings."),
+          tags$li("Sex-related biology differences (including more MINOCA) can complicate diagnosis and management.")
+        ),
+        tags$p("These findings are summarized from the project note in heart_attack.md.")
+      )
     )
     
     )
