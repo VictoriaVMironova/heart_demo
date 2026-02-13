@@ -81,6 +81,30 @@ ui <- page_sidebar(
       )
       ),
     nav_panel(
+      "Charges",
+      layout_column_wrap(
+        width = 1/3,
+        value_box(
+          title = "Avg Bill (CHARGES)",
+          value = textOutput("avg_bill"),
+          theme = "success",
+          showcase = bsicons::bs_icon("cash-stack")
+        ),
+        value_box(
+          title = "Avg LOS (days)",
+          value = textOutput("avg_los"),
+          theme = "info",
+          showcase = bsicons::bs_icon("calendar3")
+        ),
+        value_box(
+          title = "Cost per Day",
+          value = textOutput("cost_per_day"),
+          theme = "warning",
+          showcase = bsicons::bs_icon("receipt")
+        )
+      )
+    ),
+    nav_panel(
       "Data", 
       DT::dataTableOutput("data_table"))
     )
