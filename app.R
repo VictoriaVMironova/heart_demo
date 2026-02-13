@@ -69,6 +69,10 @@ ui <- page_sidebar(
         card_header("Age Distribution"),
         plotOutput("age_hist"),
         mod_download_plot_ui("dl_age", label = "Download")
+      ),
+      card(
+        card_header("Summary Statistics"),
+        tableOutput("overview_summary")
       )
       
       ),
@@ -217,6 +221,33 @@ server <- function(input, output, session) {
   output$m_mortality <- renderText({
     compute_mortality(filtered_data()[filtered_data()$SEX == "Male", ])
   })
+  
+  output$overview_summary <- renderTable({
+    df <- filtered_data()
+    req(nrow(df) >= 1)
+    
+    sexes <- sort(unique(as.character(df$SEX)))
+    
+    do.call(rbind, lapply(sexes, function(sx) {
+      d <- df[df$SEX == sx, , drop = FALSE]
+      age <- suppressWarnings(as.numeric(d$AGE))
+      los <- suppressWarnings(as.numeric(d$LOS))
+      charges <- suppressWarnings(as.numeric(d$CHARGES))
+      
+      data.frame(
+        Sex = sx,
+        `Patients (n)` = format(nrow(d), big.mark = ","),
+        `Average Age` = fmt_num(mean(age, na.rm = TRUE), 1),
+        `Median Age` = fmt_num(median(age, na.rm = TRUE), 1),
+        `Average LOS (days)` = fmt_num(mean(los, na.rm = TRUE), 1),
+        `Median LOS (days)` = fmt_num(median(los, na.rm = TRUE), 1),
+        `Average Charges` = fmt_num(mean(charges, na.rm = TRUE), 0),
+        `Median Charges` = fmt_num(median(charges, na.rm = TRUE), 0),
+        `Mortality Rate` = compute_mortality(d),
+        check.names = FALSE
+      )
+    }))
+  }, striped = TRUE, spacing = "s", bordered = TRUE, align = "lrrrrrrrr")
   
   output$f_los_avg <- renderText({
     df <- filtered_data()[filtered_data()$SEX == "Female", , drop = FALSE]
