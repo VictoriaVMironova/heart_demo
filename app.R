@@ -74,7 +74,11 @@ ui <- page_sidebar(
       ),
     nav_panel(
       "Explore",
-      plotlyOutput("scatter_plot")
+      card(
+        card_header("Age vs Length of Stay"),
+        plotlyOutput("scatter_plot"),
+        mod_download_plot_ui("dl_scatter", label = "Download")
+      )
       ),
     nav_panel(
       "Data", 
@@ -131,19 +135,39 @@ server <- function(input, output, session) {
   mod_download_plot_server("dl_age", filename = "age_distribution", figure = age_plot)
   
   
-  output$scatter_plot <- renderPlotly({
+  
+  # output$scatter_plot <- renderPlotly({
+  #   df <- filtered_data()
+  #   req(nrow(df) >= 1)
+  #   if(nrow(df) > 1000) {
+  #     df <- df[sample(nrow(df), 1000), ]
+  #   }
+  #   p <- ggplot(df, aes(x = AGE, y = LOS, color = SEX)) +
+  #     geom_point(alpha = 0.3) +
+  #     labs(x = "Age", y = "Length of Stay (days)", color = "Sex") +
+  #     geom_smooth(method = "lm", se = FALSE) +
+  #     theme_minimal()
+  #   ggplotly(p)
+  # })
+  
+  scatter_plot_obj <- reactive({
     df <- filtered_data()
     req(nrow(df) >= 1)
     if(nrow(df) > 1000) {
       df <- df[sample(nrow(df), 1000), ]
     }
-    p <- ggplot(df, aes(x = AGE, y = LOS, color = SEX)) +
+    ggplot(df, aes(x = AGE, y = LOS, color = SEX)) +
       geom_point(alpha = 0.3) +
       labs(x = "Age", y = "Length of Stay (days)", color = "Sex") +
-      geom_smooth(method = "lm", se = FALSE) +
       theme_minimal()
-    ggplotly(p)
   })
+  
+  # Display as interactive plotly
+  output$scatter_plot <- renderPlotly({
+    ggplotly(scatter_plot_obj())
+  })
+  
+  mod_download_plot_server("dl_scatter", filename = "scatter_age_los", figure = scatter_plot_obj)
   
   observeEvent(input$reset, {
     updateSelectInput(session, "outcome", selected = "All")
