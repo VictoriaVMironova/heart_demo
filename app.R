@@ -227,15 +227,17 @@ server <- function(input, output, session) {
       labs(x = "Length of Stay (days)", y = "Density", fill = "DIED") +
       facet_wrap(~ SEX) +
       theme_minimal() +
-      theme(
-        axis.title = element_text(size = 16),
-        axis.text = element_text(size = 14)
-      )
+      density_axis_theme
   })
   
   output$los_density <- renderPlot({
     los_density_plot()
   })
+  
+  density_axis_theme <- theme(
+    axis.title = element_text(size = 16),
+    axis.text = element_text(size = 14)
+  )
   
   
   # Create the age plot as a reactive (reusable)
@@ -246,10 +248,7 @@ server <- function(input, output, session) {
       labs(x = "Age", y = "Density", fill = "DIED") +
       facet_wrap(~ SEX) +
       theme_minimal() +
-      theme(
-        axis.title = element_text(size = 16),
-        axis.text = element_text(size = 14)
-      )
+      density_axis_theme
   })
   
   # Display the plot
