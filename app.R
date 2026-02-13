@@ -102,6 +102,11 @@ ui <- page_sidebar(
           theme = "warning",
           showcase = bsicons::bs_icon("receipt")
         )
+      ),
+      card(
+        card_header("Daily Charges (Cost per Day)"),
+        plotOutput("charges_boxplot", height = "450px"),
+        mod_download_plot_ui("dl_charges_boxplot", label = "Download")
       )
     ),
     nav_panel(
