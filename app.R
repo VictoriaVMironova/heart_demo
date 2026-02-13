@@ -73,6 +73,28 @@ ui <- page_sidebar(
       
       ),
     nav_panel(
+      "Length of Stay",
+      layout_column_wrap(
+        width = 1/2,
+        value_box(
+          title = "Female Avg LOS",
+          value = textOutput("f_los_avg"),
+          theme = "danger",
+          showcase = bsicons::bs_icon("gender-female")
+        ),
+        value_box(
+          title = "Male Avg LOS",
+          value = textOutput("m_los_avg"),
+          theme = "primary",
+          showcase = bsicons::bs_icon("gender-male")
+        )
+      ),
+      card(
+        card_header("Length of Stay Distribution"),
+        plotOutput("los_density")
+      )
+    ),
+    nav_panel(
       "Explore",
       card(
         card_header("Age vs Length of Stay"),
@@ -177,6 +199,42 @@ server <- function(input, output, session) {
   # Male stats
   output$m_mortality <- renderText({
     compute_mortality(filtered_data()[filtered_data()$SEX == "Male", ])
+  })
+  
+  output$f_los_avg <- renderText({
+    df <- filtered_data()[filtered_data()$SEX == "Female", , drop = FALSE]
+    los <- suppressWarnings(as.numeric(df$LOS))
+    if (length(los) == 0 || all(is.na(los))) return("N/A")
+    paste0(fmt_num(mean(los, na.rm = TRUE), 1), " days")
+  })
+  
+  output$m_los_avg <- renderText({
+    df <- filtered_data()[filtered_data()$SEX == "Male", , drop = FALSE]
+    los <- suppressWarnings(as.numeric(df$LOS))
+    if (length(los) == 0 || all(is.na(los))) return("N/A")
+    paste0(fmt_num(mean(los, na.rm = TRUE), 1), " days")
+  })
+  
+  los_density_plot <- reactive({
+    df <- filtered_data()
+    los <- suppressWarnings(as.numeric(df$LOS))
+    df <- df[!is.na(los), , drop = FALSE]
+    req(nrow(df) >= 2)
+    df$LOS <- los[!is.na(los)]
+    
+    ggplot(df, aes(x = LOS, fill = DIED)) +
+      geom_density(alpha = 0.5) +
+      labs(x = "Length of Stay (days)", y = "Density", fill = "DIED") +
+      facet_wrap(~ SEX) +
+      theme_minimal() +
+      theme(
+        axis.title = element_text(size = 16),
+        axis.text = element_text(size = 14)
+      )
+  })
+  
+  output$los_density <- renderPlot({
+    los_density_plot()
   })
   
   
